@@ -1,37 +1,37 @@
 import requests
 from PySide2 import QtCore
 
+
 class ApiRatp(QtCore.QObject):
     def getSpinBusy(self):
         return self.spin_busy_intern
+
     @QtCore.Signal
     def spinBusyChanged(self):
         pass
-    spin_busy = QtCore.Property(type = bool, fget = getSpinBusy, notify = spinBusyChanged)
+
+    spin_busy = QtCore.Property(type=bool, fget=getSpinBusy, notify=spinBusyChanged)
 
     def __init__(self, parent=None):
         super(ApiRatp, self).__init__(parent)
         self.headers = {
-            'accept': 'application/json',
+            "accept": "application/json",
         }
-        self.url = 'https://api-ratp.pierre-grimaud.fr/v4'
+        self.url = "https://api-ratp.pierre-grimaud.fr/v4"
         self.nb_retry = 5
         self.spin_busy_intern = False
 
     def call(self, arg):
-        return requests.get(
-                f"{self.url}/{arg}",
-                headers=self.headers).json()
-    
+        return requests.get(f"{self.url}/{arg}", headers=self.headers).json()
+
     def getBuses(self):
         return self.call_with_retries(self.getBusesNoRetry)
-                
+
     def getBusesNoRetry(self):
         try:
             r = self.call("lines/buses")["result"]
             if "buses" in r:
-                return list(map(lambda r: (r["name"], r["code"]),
-                    r["buses"]))
+                return list(map(lambda r: (r["name"], r["code"]), r["buses"]))
             return None
         except requests.exceptions.ConnectionError:
             return [("Invalide, pas d'internet", -1)]
@@ -40,8 +40,7 @@ class ApiRatp(QtCore.QObject):
         try:
             r = self.call(f"stations/buses/{bus_code}?way={way}")["result"]
             if "stations" in r:
-                return list(map(lambda r: (r["name"], r["slug"]),
-                    r["stations"]))
+                return list(map(lambda r: (r["name"], r["slug"]), r["stations"]))
             return None
         except requests.exceptions.ConnectionError:
             return [("Invalide, pas d'internet", "")]
@@ -58,13 +57,13 @@ class ApiRatp(QtCore.QObject):
         return list(set(stations_A + stations_R))
 
     def call_with_retries(self, func, *args):
-        self.spin_busy_intern = True  
-        self.spinBusyChanged.emit()   
+        self.spin_busy_intern = True
+        self.spinBusyChanged.emit()
         for x in range(self.nb_retry):
             ret = func(*args)
             if ret != None:
                 self.spin_busy_intern = False
-                self.spinBusyChanged.emit()                
+                self.spinBusyChanged.emit()
                 return ret
         self.spin_busy_intern = False
         self.spinBusyChanged.emit()
@@ -75,8 +74,9 @@ class ApiRatp(QtCore.QObject):
             print(f"schedules/buses/{bus_code}/{station_code}/{way}")
             r = self.call(f"schedules/buses/{bus_code}/{station_code}/{way}")["result"]
             if "schedules" in r:
-                return list(map(lambda r: (r["message"], r["destination"]),
-                    r["schedules"]))
+                return list(
+                    map(lambda r: (r["message"], r["destination"]), r["schedules"])
+                )
             return None
         except requests.exceptions.ConnectionError:
             return [("Invalide, pas d'internet", -1)]

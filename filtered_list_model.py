@@ -3,6 +3,7 @@ from typing import Tuple
 from PySide2 import QtCore
 from pprint import pprint
 
+
 class FilteredListModel(QtCore.QAbstractListModel):
     # Data =  [ (name1, id1), (name2, id2) ]
     NameRole = QtCore.Qt.UserRole + 1000
@@ -28,17 +29,17 @@ class FilteredListModel(QtCore.QAbstractListModel):
             elif role == FilteredListModel.IdRole:
                 return item[1]
         return ""
-    
+
     def roleNames(self):
-        return {FilteredListModel.NameRole:b"name", FilteredListModel.IdRole:b"id"}
+        return {FilteredListModel.NameRole: b"name", FilteredListModel.IdRole: b"id"}
 
     @QtCore.Slot()
-    def update_data_impl(self): 
+    def update_data_impl(self):
         self.beginRemoveRows(QtCore.QModelIndex(), 0, self.previous_row_count)
         self.endRemoveRows()
-        self.beginInsertRows(QtCore.QModelIndex(), 0, self.rowCount()-1)
-        self.endInsertRows()      
-    
+        self.beginInsertRows(QtCore.QModelIndex(), 0, self.rowCount() - 1)
+        self.endInsertRows()
+
     def check_data(self, data):
         if isinstance(data, list):
             return all(map(self.check_row_valid, data))
@@ -66,8 +67,7 @@ class FilteredListModel(QtCore.QAbstractListModel):
             self.filtered_data.clear()
             self.filtered_data = self.get_filtered_data(filter)
             QtCore.QMetaObject.invokeMethod(self, "update_data_impl")
-            
+
         else:
             print("API donnée invalide")
             pprint(data)
-

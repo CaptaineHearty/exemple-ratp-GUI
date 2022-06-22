@@ -1,4 +1,3 @@
-
 import sys
 
 from PySide2.QtGui import QGuiApplication
@@ -31,7 +30,7 @@ engine.rootContext().setContextProperty("etasModel", etasModel)
 engine.rootContext().setContextProperty("myApi", myApi)
 
 engine.quit.connect(app.quit)
-engine.load('main.qml')
+engine.load("main.qml")
 
 
 sys.exit(app.exec_())
